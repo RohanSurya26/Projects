@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIML CMS - Student Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-microchip"></i> AIML Dept.
+        </div>
+        <div class="sidebar-nav">
+            <a href="{{ url_for('dashboard.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('dashboard.') %}active{% endif %}"><i class="fas fa-chart-pie"></i> My Dashboard</a>
+            <a href="{{ url_for('attendance.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('attendance.') %}active{% endif %}"><i class="fas fa-calendar-check"></i> My Attendance</a>
+            <a href="{{ url_for('grades.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('grades.') %}active{% endif %}"><i class="fas fa-award"></i> Grade Card</a>
+            <a href="{{ url_for('fees.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('fees.') %}active{% endif %}"><i class="fas fa-wallet"></i> My Fees</a>
+            <a href="{{ url_for('timetable.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('timetable.') %}active{% endif %}"><i class="fas fa-calendar-alt"></i> Timetable</a>
+            <a href="{{ url_for('events.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('events.') %}active{% endif %}"><i class="fas fa-calendar-day"></i> Events</a>
+            <a href="{{ url_for('insights.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('insights.') %}active{% endif %}"><i class="fas fa-brain text-purple"></i> AI Insights</a>
+        </div>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <h1>Student Portal</h1>
+            <div class="header-right d-flex align-items-center gap-3">
+                <button id="theme-toggle" class="btn p-2" style="border-radius: 50%; background-color: var(--card-bg); color: var(--text-primary); border: 1px solid var(--border-color);">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="user-info">
+                    <i class="fas fa-user-graduate fa-2x"></i>
+                    <span>{{ g.student_name | default('Student') }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = themeToggleBtn.querySelector('i');
+        
+        // Check for saved theme preference
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            document.body.classList.toggle('light-mode');
+            let theme = 'dark';
+            if (document.body.classList.contains('light-mode')) {
+                theme = 'light';
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            localStorage.setItem('theme', theme);
+        });
+    </script>
+</body>
+</html>

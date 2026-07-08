@@ -1,0 +1,227 @@
+{% extends "base_student.html" %}
+
+{% block title %}AI Insights{% endblock %}
+
+{% block content %}
+<div class="header-banner" style="background: linear-gradient(135deg, rgba(88,101,242,0.2) 0%, rgba(255,0,128,0.2) 100%);">
+    <h2><i class="fas fa-brain text-white"></i> AI Insights & Pathway</h2>
+    <p>Powered by SWI-Prolog Expert System</p>
+</div>
+
+<style>
+    .glow-card {
+        background: var(--surface-color);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .glow-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .glow-card.pathway {
+        border-color: rgba(0, 255, 170, 0.3);
+        box-shadow: 0 0 20px rgba(0, 255, 170, 0.1);
+    }
+    .glow-card.pathway:hover {
+        box-shadow: 0 10px 40px rgba(0, 255, 170, 0.2);
+    }
+    
+    .glow-card.risk {
+        border-color: rgba(255, 87, 87, 0.3);
+        box-shadow: 0 0 20px rgba(255, 87, 87, 0.1);
+    }
+    
+    .glow-card.risk.safe {
+        border-color: rgba(88, 101, 242, 0.3);
+        box-shadow: 0 0 20px rgba(88, 101, 242, 0.1);
+    }
+
+    .accent-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+        background: -webkit-linear-gradient(45deg, #00ffaa, #0088ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .pulse-dot {
+        height: 12px;
+        width: 12px;
+        background-color: #00ffaa;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 10px #00ffaa;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 170, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 255, 170, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 170, 0); }
+    }
+    
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(255, 87, 87, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(255, 87, 87, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 87, 87, 0); }
+    }
+</style>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="glow-card pathway p-4 h-100 d-flex flex-column justify-content-center align-items-center text-center">
+            <i class="fas fa-rocket accent-icon mb-3"></i>
+            <h5 class="text-secondary mb-1">Recommended Career Pathway</h5>
+            <div class="metric-value mb-2">{{ career_path }}</div>
+            <p class="text-secondary small mb-0 w-75">
+                Our Prolog engine analyzed your grades across all subjects and deduced this pathway as your optimal trajectory. Your top performing area is <strong>{{ top_subject_name }}</strong>.
+            </p>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="glow-card risk {% if 'Critical' not in risk_status and 'Hazard' not in risk_status %}safe{% endif %} p-4 h-100 d-flex flex-column justify-content-center align-items-center text-center">
+            <i class="fas fa-shield-alt accent-icon mb-3" style="{% if 'Critical' in risk_status %}background: -webkit-linear-gradient(45deg, #ff5757, #ff0000); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;{% endif %}"></i>
+            <h5 class="text-secondary mb-1">Academic Risk Forecaster</h5>
+            <div class="metric-value mb-2" style="font-size: 2rem;">
+                {% if 'Critical' not in risk_status and 'Hazard' not in risk_status %}
+                    <span class="pulse-dot me-2"></span>
+                {% else %}
+                    <span class="pulse-dot me-2" style="background-color: #ff5757; box-shadow: 0 0 10px #ff5757; animation: pulse-red 2s infinite;"></span>
+                {% endif %}
+                {{ risk_status }}
+            </div>
+            <p class="text-secondary small mb-0 w-75">
+                Based on your current attendance ({{ att_pct }}%) and overall performance ({{ avg_marks }} avg. marks).
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stepper-wrapper {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .stepper-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 18px;
+      left: 12.5%;
+      width: 75%;
+      height: 2px;
+      background-color: var(--border-color);
+      z-index: 0;
+    }
+    .step {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 25%;
+      text-align: center;
+    }
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--card-bg);
+      border: 3px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .step-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      line-height: 1.3;
+      padding: 0 5px;
+    }
+    .step.active .step-circle {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.6);
+    }
+    .step.active .step-text {
+      color: var(--accent);
+      font-weight: bold;
+    }
+</style>
+
+<div class="row g-4 mt-2">
+    <div class="col-12">
+        <div class="card p-4 border-0 shadow">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-route text-primary fs-3 me-3"></i>
+                <h4 class="mb-0 text-white">Career Profile Progression</h4>
+            </div>
+            
+            <div class="stepper-wrapper">
+                {% for stage in stages %}
+                <div class="step {% if loop.index <= 1 %}active{% endif %}">
+                    <div class="step-circle">
+                        {% if loop.index == 1 %}<i class="fas fa-check"></i>{% else %}{{ loop.index }}{% endif %}
+                    </div>
+                    <div class="step-text">{{ stage }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <hr style="border-color: var(--border-color); margin: 2rem 0;">
+            
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-microchip text-primary fs-3 me-3"></i>
+                <h5 class="mb-0 text-white">AI Decision Statistics</h5>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="p-3 rounded bg-dark border border-secondary text-center h-100" style="border-color: var(--border-color) !important;">
+                        <div class="small text-secondary mb-1">Your Global Average</div>
+                        <div class="fs-3 text-white" style="font-weight: bold;">{{ avg_marks }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded bg-dark border border-secondary text-center h-100" style="border-color: var(--border-color) !important;">
+                        <div class="small text-secondary mb-1">Baseline Threshold</div>
+                        <div class="fs-3 text-white" style="font-weight: bold;">{{ reason.threshold }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded border text-center h-100" style="{% if reason.gap >= 0 %}border-color: var(--success); background: rgba(16, 185, 129, 0.1);{% else %}border-color: var(--danger); background: rgba(239, 68, 68, 0.1);{% endif %}">
+                        <div class="small mb-1" style="color: {% if reason.gap >= 0 %}var(--success){% else %}var(--danger){% endif %}">Clearance Margin</div>
+                        <div class="fs-3" style="font-weight: bold; color: {% if reason.gap >= 0 %}var(--success){% else %}var(--danger){% endif %}">
+                            {% if reason.gap > 0 %}+{% endif %}{{ reason.gap }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 p-3 rounded" style="background: rgba(0,0,0,0.3); border-left: 4px solid {% if reason.gap >= 0 %}var(--accent){% else %}var(--danger){% endif %};">
+                <i class="fas fa-robot me-2 text-primary"></i> 
+                <span class="text-secondary"><strong>Prolog System Notice:</strong> {{ reason.status }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

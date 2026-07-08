@@ -1,0 +1,82 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Grade Entry System</h2>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div style="background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 24px;">
+    <form method="GET" action="{{ url_for('grades.index') }}" style="display: flex; gap: 16px; align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">Subject</label>
+            <select name="subject_id" class="form-control" required style="background: var(--bg-color);">
+                <option value="" disabled {% if not subject_id %}selected{% endif %}>Select Subject</option>
+                {% for s in subjects %}
+                    <option value="{{ s['id'] }}" {% if subject_id == s['id'] %}selected{% endif %}>{{ s['code'] }} - {{ s['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: auto;">Load Roster</button>
+    </form>
+</div>
+
+{% if subject_id %}
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <form action="{{ url_for('grades.save') }}" method="POST">
+        <input type="hidden" name="subject_id" value="{{ subject_id }}">
+        
+        <table class="table">
+            <thead style="background: rgba(255,255,255,0.05);">
+                <tr>
+                    <th >Roll No</th>
+                    <th >Student Name</th>
+                    <th >Internal (40)</th>
+                    <th >External (60)</th>
+                    <th >Total AI Computed Grade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                {% set rec = existing_grades.get(student['id'], {}) %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td >{{ student['roll_no'] }}</td>
+                    <td style="padding: 16px; font-weight: 500;">{{ student['name'] }}</td>
+                    <td class="text-center">
+                        <input type="number" name="int_mark_{{ student['id'] }}" class="form-control" style="width: 80px; text-align: center; padding: 6px;" value="{{ rec.get('internal_marks', '') }}" min="0" max="40">
+                    </td>
+                    <td class="text-center">
+                        <input type="number" name="ext_mark_{{ student['id'] }}" class="form-control" style="width: 80px; text-align: center; padding: 6px;" value="{{ rec.get('external_marks', '') }}" min="0" max="60">
+                    </td>
+                    <td class="text-center">
+                        {% if rec.get('grade') %}
+                            <span style="font-weight: bold; padding: 4px 12px; border-radius: 8px; background: rgba(255,255,255,0.1);">{{ rec.get('total') }} : <span style="color: var(--accent);">{{ rec.get('grade') }}</span></span>
+                        {% else %}
+                            <span class="text-secondary">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="padding: 24px; text-align: center; color: var(--text-secondary);">No students found in this semester.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if students %}
+        <div style="padding: 20px; text-align: right; border-top: 1px solid var(--border-color);">
+            <button type="submit" class="btn btn-primary" style="width: auto;"><i class="fas fa-save"></i> Save Grades</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
+{% endblock %}

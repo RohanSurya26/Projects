@@ -1,0 +1,72 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Subjects Catalog</h2>
+    <button class="btn btn-primary" style="width: auto;" onclick="document.getElementById('addModal').style.display='flex'">
+        <i class="fas fa-plus"></i> Add Subject
+    </button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <table class="table">
+        <thead style="background: rgba(255,255,255,0.05);">
+            <tr>
+                <th >Code</th>
+                <th >Subject Name</th>
+                <th >Semester</th>
+                <th >Credits</th>
+                <th >Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in subjects %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td >{{ s['code'] }}</td>
+                <td style="padding: 16px; font-weight: 500;">{{ s['name'] }}</td>
+                <td ><span style="background: var(--accent); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Sem {{ s['semester'] }}</span></td>
+                <td style="padding: 16px; color: var(--text-secondary);">{{ s['credits'] }}</td>
+                <td class="text-center">
+                    <a href="{{ url_for('subjects.delete', id=s['id']) }}" style="color: var(--danger); text-decoration: none;" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="padding: 24px; text-align: center; color: var(--text-secondary);">No subjects found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="addModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div style="background: var(--card-bg); width: 400px; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>New Subject</h3>
+            <i class="fas fa-times" style="cursor: pointer; color: var(--text-secondary);" onclick="document.getElementById('addModal').style.display='none'"></i>
+        </div>
+        <form action="{{ url_for('subjects.add') }}" method="POST">
+            <div class="form-group"><input type="text" name="code" class="form-control" placeholder="Course Code (e.g. DL401)" required></div>
+            <div class="form-group"><input type="text" name="name" class="form-control" placeholder="Subject Name" required></div>
+            <div class="form-group">
+                <select name="semester" class="form-control" required style="background: var(--bg-color);">
+                    <option value="" disabled selected>Select Semester</option>
+                    {% for i in range(1, 9) %}<option value="{{ i }}">Semester {{ i }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group"><input type="number" name="credits" class="form-control" placeholder="Credits (1-4)" min="1" max="4" required></div>
+            
+            <button type="submit" class="btn btn-primary">Save Subject</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

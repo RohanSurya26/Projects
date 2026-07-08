@@ -1,0 +1,114 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Fee Management</h2>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <table class="table">
+        <thead style="background: rgba(255,255,255,0.05);">
+            <tr>
+                <th >Roll No</th>
+                <th >Student Name</th>
+                <th >Sem</th>
+                <th >Total Fee</th>
+                <th >Due</th>
+                <th >Status</th>
+                <th >Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td >{{ r['roll_no'] }}</td>
+                <td style="padding: 16px; font-weight: 500;">{{ r['name'] }}</td>
+                <td class="text-center">{{ r['semester'] }}</td>
+                
+                {% if r['fee_id'] %}
+                    <td style="padding: 16px; text-align: right;">₹{{ "%.2f"|format(r['total_amount']) }}</td>
+                    <td style="padding: 16px; text-align: right; color: var(--danger); font-weight: bold;">
+                        ₹{{ "%.2f"|format(r['total_amount'] - r['amount_paid']) }}
+                    </td>
+                    <td class="text-center">
+                        {% if r['status'] == 'Paid' %}
+                            <span style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 4px 12px; border-radius: 20px; font-size: 12px;">Paid</span>
+                        {% elif r['status'] == 'Partial' %}
+                            <span style="background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 4px 12px; border-radius: 20px; font-size: 12px;">Partial</span>
+                        {% else %}
+                            <span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 4px 12px; border-radius: 20px; font-size: 12px;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if r['status'] != 'Paid' %}
+                            <button class="btn" style="background: var(--success); color: white; padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('payModal_{{ r['fee_id'] }}').style.display='flex'">Add Payment</button>
+                            
+                            <!-- Payment Modal -->
+                            <div id="payModal_{{ r['fee_id'] }}" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; text-align: left;">
+                                <div style="background: var(--card-bg); width: 400px; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3>Record Payment</h3>
+                                        <i class="fas fa-times" style="cursor: pointer; color: var(--text-secondary);" onclick="document.getElementById('payModal_{{ r['fee_id'] }}').style.display='none'"></i>
+                                    </div>
+                                    <p style="margin-bottom: 16px;">Student: <strong>{{ r['name'] }}</strong><br>Due: <strong>₹{{ "%.2f"|format(r['total_amount'] - r['amount_paid']) }}</strong></p>
+                                    <form action="{{ url_for('fees.pay') }}" method="POST">
+                                        <input type="hidden" name="fee_id" value="{{ r['fee_id'] }}">
+                                        <div class="form-group">
+                                            <label class="form-label">Amount Received (₹)</label>
+                                            <input type="number" name="payment_amount" class="form-control" step="0.01" max="{{ r['total_amount'] - r['amount_paid'] }}" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Payment</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% else %}
+                            <span class="text-secondary"><i class="fas fa-check"></i> Cleared</span>
+                        {% endif %}
+                    </td>
+                {% else %}
+                    <td colspan="3" class="text-center">Fee Not Generated</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('genModal_{{ r['student_id'] }}').style.display='flex'">Generate</button>
+                        
+                        <!-- Generate Modal -->
+                        <div id="genModal_{{ r['student_id'] }}" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; text-align: left;">
+                            <div style="background: var(--card-bg); width: 400px; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h3>Generate Fee Structure</h3>
+                                    <i class="fas fa-times" style="cursor: pointer; color: var(--text-secondary);" onclick="document.getElementById('genModal_{{ r['student_id'] }}').style.display='none'"></i>
+                                </div>
+                                <form action="{{ url_for('fees.generate') }}" method="POST">
+                                    <input type="hidden" name="student_id" value="{{ r['student_id'] }}">
+                                    <input type="hidden" name="semester" value="{{ r['semester'] }}">
+                                    <div class="form-group">
+                                        <label class="form-label">Total Fee Amount (₹)</label>
+                                        <input type="number" name="total_amount" class="form-control" value="1500" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Due Date</label>
+                                        <input type="date" name="due_date" class="form-control" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Generate</button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                {% endif %}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-secondary);">No student records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

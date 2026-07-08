@@ -1,0 +1,55 @@
+{% extends "base_student.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Grade Card</h2>
+        <p class="text-secondary">Your academic performance for all graded subjects.</p>
+    </div>
+    <div style="background: var(--card-bg); padding: 16px 24px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 4px;">Cumulative GPA</p>
+        <h2 class="text-primary mb-0">{{ cgpa }}</h2>
+    </div>
+</div>
+
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <table class="table">
+        <thead style="background: rgba(255,255,255,0.05);">
+            <tr>
+                <th >Subject Code</th>
+                <th >Subject Name</th>
+                <th >Credits</th>
+                <th >Internal (40)</th>
+                <th >External (60)</th>
+                <th >Total</th>
+                <th >Prolog Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in grade_card %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 16px; color: var(--text-secondary);">{{ r['code'] }}</td>
+                <td style="padding: 16px; font-weight: 500;">{{ r['subject'] }}</td>
+                <td class="text-center">{{ r['credits'] }}</td>
+                <td class="text-center">{{ r['internal'] }}</td>
+                <td class="text-center">{{ r['external'] }}</td>
+                <td class="text-center">{{ r['total'] }}</td>
+                <td class="text-center">
+                    {% if r['grade'] == 'F' %}
+                        <span style="color: var(--danger); font-weight: bold; font-size: 18px;">{{ r['grade'] }}</span>
+                    {% elif r['grade'] == 'O' or r['grade'] == 'A+' %}
+                        <span style="color: var(--success); font-weight: bold; font-size: 18px;">{{ r['grade'] }}</span>
+                    {% else %}
+                        <span style="color: var(--accent); font-weight: bold; font-size: 18px;">{{ r['grade'] }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" style="padding: 24px; text-align: center; color: var(--text-secondary);">No grades posted yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

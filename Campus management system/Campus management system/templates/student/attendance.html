@@ -1,0 +1,51 @@
+{% extends "base_student.html" %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <h2>My Attendance</h2>
+    <p class="text-secondary">Your attendance record across all enrolled subjects.</p>
+</div>
+
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <table class="table">
+        <thead style="background: rgba(255,255,255,0.05);">
+            <tr>
+                <th >Subject Code</th>
+                <th >Subject Name</th>
+                <th >Classes Attended</th>
+                <th >Percentage</th>
+                <th >Exam Eligibility</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 16px; color: var(--text-secondary);">{{ r['code'] }}</td>
+                <td style="padding: 16px; font-weight: 500;">{{ r['subject'] }}</td>
+                <td class="text-center">{{ r['present'] }} / {{ r['total'] }}</td>
+                <td class="text-center">
+                    {% if r['percentage'] >= 75 %}
+                        <span style="color: var(--success); font-weight: bold;">{{ r['percentage'] }}%</span>
+                    {% elif r['percentage'] >= 65 %}
+                        <span style="color: var(--warning); font-weight: bold;">{{ r['percentage'] }}%</span>
+                    {% else %}
+                        <span style="color: var(--danger); font-weight: bold;">{{ r['percentage'] }}%</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {% if r['eligible'] %}
+                        <span style="background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 4px 12px; border-radius: 20px; font-size: 12px;"><i class="fas fa-check-circle"></i> Eligible</span>
+                    {% else %}
+                        <span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 4px 12px; border-radius: 20px; font-size: 12px;"><i class="fas fa-times-circle"></i> Shortage</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="padding: 24px; text-align: center; color: var(--text-secondary);">No attendance records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

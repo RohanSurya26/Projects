@@ -1,0 +1,79 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Mark Attendance</h2>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div style="background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 24px;">
+    <form method="GET" action="{{ url_for('attendance.index') }}" style="display: flex; gap: 16px; align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">Subject</label>
+            <select name="subject_id" class="form-control" required style="background: var(--bg-color);">
+                <option value="" disabled {% if not subject_id %}selected{% endif %}>Select Subject</option>
+                {% for s in subjects %}
+                    <option value="{{ s['id'] }}" {% if subject_id == s['id'] %}selected{% endif %}>{{ s['code'] }} - {{ s['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-control" value="{{ date }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: auto;">Load Students</button>
+    </form>
+</div>
+
+{% if subject_id %}
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <form action="{{ url_for('attendance.mark') }}" method="POST">
+        <input type="hidden" name="subject_id" value="{{ subject_id }}">
+        <input type="hidden" name="date" value="{{ date }}">
+        
+        <table class="table">
+            <thead style="background: rgba(255,255,255,0.05);">
+                <tr>
+                    <th >Roll No</th>
+                    <th >Student Name</th>
+                    <th >Status (P/A/L)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td >{{ student['roll_no'] }}</td>
+                    <td style="padding: 16px; font-weight: 500;">{{ student['name'] }}</td>
+                    <td class="text-center">
+                        {% set status = existing_attendance.get(student['id'], 'P') %}
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <label style="color: var(--success); cursor: pointer;"><input type="radio" name="status_{{ student['id'] }}" value="P" {% if status == 'P' %}checked{% endif %}> P</label>
+                            <label style="color: var(--danger); cursor: pointer;"><input type="radio" name="status_{{ student['id'] }}" value="A" {% if status == 'A' %}checked{% endif %}> A</label>
+                            <label style="color: var(--warning); cursor: pointer;"><input type="radio" name="status_{{ student['id'] }}" value="L" {% if status == 'L' %}checked{% endif %}> L</label>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="padding: 24px; text-align: center; color: var(--text-secondary);">No students found in this semester.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if students %}
+        <div style="padding: 20px; text-align: right; border-top: 1px solid var(--border-color);">
+            <button type="submit" class="btn btn-primary" style="width: auto;"><i class="fas fa-save"></i> Save Attendance</button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
+{% endblock %}

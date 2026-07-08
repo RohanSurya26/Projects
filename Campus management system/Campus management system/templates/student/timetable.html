@@ -1,0 +1,44 @@
+{% extends "base_student.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Semester {{ semester }} - Section {{ section }} Timetable</h2>
+        <p class="text-secondary">Your assigned weekly class schedule.</p>
+    </div>
+</div>
+
+<div style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 24px; overflow-x: auto;">
+    <table class="table small">
+        <thead>
+            <tr>
+                <th >Time \ Day</th>
+                {% for d in days %}
+                <th >{{ d }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in slots %}
+            <tr>
+                <td >{{ s }}</td>
+                {% for d in days %}
+                    {% set cell = schedule[d][s] %}
+                    <td >
+                        {% if cell %}
+                            <div style="background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--accent); padding: 10px; border-radius: 4px; text-align: left;">
+                                <div style="font-weight: bold; color: var(--accent); margin-bottom: 4px;">{{ cell['subject_name'] }} ({{ cell['subject_code'] }})</div>
+                                <div style="color: var(--text-primary); font-size: 13px; margin-bottom: 4px;"><i class="fas fa-chalkboard-teacher"></i> {{ cell['faculty_name'] }}</div>
+                                <div style="color: var(--text-secondary); font-size: 12px;"><i class="fas fa-map-marker-alt"></i> {{ cell['room'] }}</div>
+                            </div>
+                        {% else %}
+                            <span style="color: var(--text-secondary); font-size: 13px;">. . .</span>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_students }}</h3>
+            <p>Total Students</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_faculty }}</h3>
+            <p>Total Faculty</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-book"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_subjects }}</h3>
+            <p>Total Subjects</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="dashboard-widgets" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 24px;">
+    <div class="widget" style="background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 16px;">Students per Semester</h3>
+        <canvas id="studentChart" height="100"></canvas>
+    </div>
+    <div class="widget" style="background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <h3 style="margin-bottom: 16px; color: var(--warning);">Prolog Alerts</h3>
+        <p class="text-secondary">No immediate alerts.</p>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('studentChart').getContext('2d');
+    const studentChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ sem_labels | tojson | safe }},
+            datasets: [{
+                label: 'Number of Students',
+                data: {{ sem_counts | tojson | safe }},
+                backgroundColor: 'rgba(111, 66, 193, 0.7)',
+                borderColor: 'rgba(111, 66, 193, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0, color: '#aaa' },
+                    grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                },
+                x: {
+                    ticks: { color: '#aaa' },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Student Directory</h2>
+    <button class="btn btn-primary" style="width: auto;" onclick="document.getElementById('addModal').style.display='flex'">
+        <i class="fas fa-plus"></i> Add Student
+    </button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="table-container" style="background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden;">
+    <table class="table">
+        <thead style="background: rgba(255,255,255,0.05);">
+            <tr>
+                <th >Roll No</th>
+                <th >Name</th>
+                <th >Sem</th>
+                <th >Sec</th>
+                <th >Email</th>
+                <th >Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td >{{ student['roll_no'] }}</td>
+                <td style="padding: 16px; font-weight: 500;">{{ student['name'] }}</td>
+                <td ><span style="background: var(--accent); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Sem {{ student['semester'] }}</span></td>
+                <td style="padding: 16px; font-weight: bold; color: var(--accent);">{{ student['section'] }}</td>
+                <td style="padding: 16px; color: var(--text-secondary);">{{ student['email'] }}</td>
+                <td class="text-center">
+                    <a href="{{ url_for('students.delete', id=student['id']) }}" style="color: var(--danger); text-decoration: none;" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="padding: 24px; text-align: center; color: var(--text-secondary);">No students found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="addModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;">
+    <div style="background: var(--card-bg); width: 400px; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>New Student</h3>
+            <i class="fas fa-times" style="cursor: pointer; color: var(--text-secondary);" onclick="document.getElementById('addModal').style.display='none'"></i>
+        </div>
+        <form action="{{ url_for('students.add') }}" method="POST">
+            <div class="form-group"><input type="text" name="roll_no" class="form-control" placeholder="Roll No (e.g. BTECH004)" required></div>
+            <div class="form-group"><input type="text" name="name" class="form-control" placeholder="Full Name" required></div>
+            <div class="form-group">
+                <select name="semester" class="form-control" required style="background: var(--bg-color);">
+                    <option value="" disabled selected>Select Semester</option>
+                    {% for i in range(1, 9) %}<option value="{{ i }}">Semester {{ i }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <select name="section" class="form-control" required style="background: var(--bg-color);">
+                    <option value="" disabled selected>Select Section</option>
+                    <option value="A">Section A</option>
+                    <option value="B">Section B</option>
+                    <option value="C">Section C</option>
+                    <option value="D">Section D</option>
+                </select>
+            </div>
+            <div class="form-group"><input type="email" name="email" class="form-control" placeholder="Email" required></div>
+            <div class="form-group"><input type="text" name="phone" class="form-control" placeholder="Phone" required></div>
+            <div class="form-group"><input type="number" name="admission_year" class="form-control" placeholder="Admission Year" value="2024" required></div>
+            
+            <button type="submit" class="btn btn-primary">Save Student</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

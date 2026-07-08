@@ -1,0 +1,142 @@
+{% extends "base_student.html" %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--success); background-color: rgba(16, 185, 129, 0.1);"><i class="fas fa-user-check"></i></div>
+        <div class="stat-info">
+            <h3>{{ att_pct }}%</h3>
+            <p>Overall Attendance</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="color: var(--warning); background-color: rgba(245, 158, 11, 0.1);"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="stat-info">
+            <h3>Pending</h3>
+            <p>Fee Status</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="dashboard-widgets d-grid" style="grid-template-columns: 1fr; gap: 24px; margin-top: 24px;">
+    <div class="widget card card-body">
+        <h3 class="mb-3 text-primary">Welcome, {{ student['name'] }}!</h3>
+        <p class="text-secondary">Roll No: {{ student['roll_no'] }} | Semester {{ student['semester'] }}</p>
+        <p class="text-secondary mt-2">Select a module from the menu to view your academic progress.</p>
+    </div>
+</div>
+
+<div class="charts-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 24px;">
+    <div class="widget card card-body text-center">
+        <h3 class="mb-3">Subject-wise Attendance</h3>
+        <div class="mx-auto" style="max-width: 300px;">
+            <canvas id="attChart" height="200"></canvas>
+        </div>
+    </div>
+    
+    <div class="widget card card-body text-center">
+        <h3 class="mb-3">Monthly Attendance</h3>
+        <div class="mx-auto w-100">
+            <canvas id="monthChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('attChart').getContext('2d');
+    const attChart = new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+            labels: {{ subj_labels | tojson | safe }},
+            datasets: [{
+                label: 'Attendance %',
+                data: {{ subj_att | tojson | safe }},
+                backgroundColor: [
+                    'rgba(0, 243, 255, 0.6)',
+                    'rgba(16, 185, 129, 0.6)',
+                    'rgba(245, 158, 11, 0.6)',
+                    'rgba(255, 0, 85, 0.6)',
+                    'rgba(139, 92, 246, 0.6)'
+                ],
+                borderColor: 'rgba(0,0,0,0.5)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { display: false, backdropColor: 'transparent' },
+                    grid: { color: 'rgba(255,255,255,0.1)' }
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#aaa', font: { family: 'Space Grotesk' } } },
+                tooltip: { 
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleColor: '#00f3ff',
+                    bodyFont: { family: 'Space Grotesk' },
+                    padding: 12
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            }
+        }
+    });
+
+    const ctxMonth = document.getElementById('monthChart').getContext('2d');
+    const monthChart = new Chart(ctxMonth, {
+        type: 'bar',
+        data: {
+            labels: {{ month_labels | tojson | safe }},
+            datasets: [{
+                label: 'Monthly Attendance %',
+                data: {{ month_att | tojson | safe }},
+                backgroundColor: 'rgba(0, 243, 255, 0.2)',
+                borderColor: '#00f3ff',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: { color: '#aaa' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#aaa', font: { family: 'Space Grotesk' } }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleColor: '#00f3ff',
+                    bodyFont: { family: 'Space Grotesk' },
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            return ' Attendance: ' + context.parsed.y + '%';
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            }
+        }
+    });
+</script>
+{% endblock %}
